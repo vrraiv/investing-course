@@ -1,0 +1,27 @@
+---
+import { getCollection, render } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import Portfolio from '../../components/Portfolio.astro';
+import Assessments from '../../components/Assessments.astro';
+export async function getStaticPaths() {
+  return (await getCollection('curriculum')).map(entry => ({ params: { id: entry.id }, props: { entry } }));
+}
+const { entry } = Astro.props;
+const { Content, headings } = await render(entry);
+const title = entry.data.title ?? headings[0]?.text ?? entry.id;
+const caseStudy = entry.id.startsWith('08-');
+---
+<Layout title={title} eyebrow="Curriculum">
+  <div slot="actions" class="page-tools"><span id="module-progress" class="tag">0% COMPLETE</span><button class="icon-button" id="print-page" title="Print page" aria-label="Print page"><i data-lucide="printer"></i></button></div>
+  {entry.id.startsWith('07-') && <Portfolio />}
+  {entry.id.startsWith('09-') && <Assessments />}
+  {entry.id.startsWith('05-') && <a class="tool-link" href="/memos/"><i data-lucide="file-pen-line"></i>Open trade memo workspace<i data-lucide="arrow-right"></i></a>}
+  {entry.id.startsWith('06-') && <a class="tool-link" href="/labs/"><i data-lucide="calculator"></i>Open calculators & scenario lab<i data-lucide="arrow-right"></i></a>}
+  <div class="reading-layout">
+    <article class="prose" id="lesson-content" data-doc={entry.id} data-case={caseStudy}>
+      {(entry.data.week || entry.data.phase || entry.data.estimated_hours || entry.data.prerequisites?.length) && <div class="metadata">{entry.data.week && <span>Week {entry.data.week}</span>}{entry.data.phase && <span>Phase {entry.data.phase}</span>}{entry.data.estimated_hours && <span>{entry.data.estimated_hours} hours</span>}{entry.data.prerequisites?.length && <span>Prerequisites: {entry.data.prerequisites.join(', ')}</span>}</div>}
+      <Content />
+    </article>
+    <aside class="contents"><span class="eyebrow">IN THIS MODULE</span><nav aria-label="Table of contents">{headings.filter(h => h.depth === 2 || (entry.id.startsWith('01-') && h.depth === 3)).map(h => <a href={`#${h.slug}`} class:list={{ sub: h.depth === 3 }}>{h.text}</a>)}</nav></aside>
+  </div>
+</Layout>

@@ -1,0 +1,18 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Your investment practice" eyebrow="Dashboard / 24-week programme">
+  <a slot="actions" href="/journal/" class="button secondary"><i data-lucide="plus"></i>Journal entry</a>
+  <section class="metrics" aria-label="Course summary">
+    <div><span class="metric-label">CURRENT WEEK</span><strong id="dash-week">01 <small>/ 24</small></strong><span id="dash-phase">Phase I</span></div>
+    <div><span class="metric-label">COURSE PROGRESS</span><strong id="dash-progress">0<small>%</small></strong><progress id="course-progress" max="100" value="0" aria-label="Course completion"></progress><span id="dash-lessons">0 headings completed</span></div>
+    <div><span class="metric-label">WEEKLY SELF-TEST</span><strong id="dash-score">-- <small>/ 10</small></strong><span id="dash-gate">Pass mark: 7 / 10</span></div>
+    <div><span class="metric-label">SHADOW FUND NAV</span><strong id="dash-nav">$100.00<small>m</small></strong><span id="dash-fund">CAD / No positions yet</span></div>
+  </section>
+  <div class="dashboard-grid">
+    <section class="current-study"><div class="section-heading"><h2>On your desk</h2><span class="tag" id="current-phase">PHASE I</span></div><div class="study-meta" id="current-week-label">WEEK 01</div><h2 class="study-title" id="current-module"></h2><div class="deliverable"><span class="eyebrow">NEXT DELIVERABLE</span><p id="next-deliverable"></p></div><a id="continue-link" class="button" href="/course/01-roadmap/">Continue learning<i data-lucide="arrow-right"></i></a></section>
+    <section class="week-overview"><div class="section-heading"><h2>24-week roadmap</h2><a href="/course/01-roadmap/" class="icon-button" title="Open roadmap" aria-label="Open roadmap"><i data-lucide="arrow-up-right"></i></a></div><div class="week-grid" id="week-grid"></div><div class="legend"><span><b class="legend-box complete"></b>Complete</span><span><b class="legend-box current"></b>Current</span><span><b class="legend-box"></b>Upcoming</span></div><div class="roadmap-caption" id="roadmap-phase"></div></section>
+  </div>
+  <section class="desk-links" aria-label="Research tools"><a href="/memos/"><i data-lucide="file-pen-line"></i><span><strong>Trade memos</strong><small id="memo-count">0 saved</small></span><i data-lucide="arrow-up-right"></i></a><a href="/course/07-shadow-portfolio/"><i data-lucide="briefcase-business"></i><span><strong>Shadow portfolio</strong><small>Positions & risk</small></span><i data-lucide="arrow-up-right"></i></a><a href="/labs/"><i data-lucide="flask-conical"></i><span><strong>Quant workbench</strong><small>Calculations & scenarios</small></span><i data-lucide="arrow-up-right"></i></a><a href="/course/09-assessments/#pm-drill"><i data-lucide="mic"></i><span><strong>PM drill</strong><small>Interview practice</small></span><i data-lucide="arrow-up-right"></i></a></section>
+  <div class="dashboard-grid lower-grid"><section><div class="section-heading"><h2>Recent journal</h2><a href="/journal/">View all <span aria-hidden="true">&rarr;</span></a></div><div id="recent-journal"></div></section><section><div class="section-heading"><h2>Assessment record</h2><a href="/course/09-assessments/">Open assessments <span aria-hidden="true">&rarr;</span></a></div><div id="assessment-record"></div></section></div>
+</Layout>

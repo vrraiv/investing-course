@@ -1,0 +1,8 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Data & settings" eyebrow="Local workspace">
+  <section class="settings-section"><h2>Course settings</h2><form id="settings-form" class="stack"><label>Current week<input type="number" name="week" min="1" max="24" required /></label><button class="button" type="submit"><i data-lucide="save"></i>Save settings</button></form></section>
+  <section class="settings-section"><h2>Personal data</h2><p>Progress, answers, journal entries, memos and portfolio records are stored in this browser. Export a backup before clearing browser data or moving to another device.</p><div class="button-row"><button id="export-all" class="button"><i data-lucide="download"></i>Export all data</button><label class="button secondary"><i data-lucide="upload"></i>Import backup<input type="file" id="import-all" accept="application/json,.json" class="file-input" aria-label="Import all data" /></label></div><p class="muted" id="data-summary"></p></section>
+  <section class="settings-section"><h2>Reset workspace</h2><p>Remove all personal course data from this browser.</p><button id="reset-all" class="button danger"><i data-lucide="trash-2"></i>Reset course data</button></section>
+</Layout>

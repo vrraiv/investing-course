@@ -1,0 +1,50 @@
+---
+import '../styles/app.css';
+import { getCurriculum, navigation } from '../lib/curriculum';
+interface Props { title: string; eyebrow?: string; }
+const { title, eyebrow = 'Learning workspace' } = Astro.props;
+const curriculum = await getCurriculum();
+const path = Astro.url.pathname;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="A local, 24-week macro investment course and shadow-fund research workspace." />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>{title} | Macro Practice</title>
+    <script is:inline>try { document.documentElement.dataset.theme = JSON.parse(localStorage.getItem('macro-practice-v1') || '{}').theme || 'light'; } catch {}</script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="/"><img src="/favicon.svg" width="32" height="32" alt="" /><span>MACRO<span class="brand-sub">PRACTICE</span></span></a>
+      <div class="sidebar-label">INVESTOR DEVELOPMENT</div>
+      <nav aria-label="Course navigation">
+        <a href="/" class:list={{ active: path === '/' }} aria-current={path === '/' ? 'page' : undefined}><i data-lucide="layout-dashboard"></i>Dashboard</a>
+        {navigation.map(([id, label, icon]) => <a href={`/course/${id}/`} class:list={{ active: path.includes(id) }} aria-current={path.includes(id) ? 'page' : undefined}><i data-lucide={icon}></i>{label}</a>)}
+      </nav>
+      <div class="sidebar-label">WORKSPACE</div>
+      <nav aria-label="Workspace navigation">
+        {[['journal', 'Investment Journal', 'notebook-pen'], ['memos', 'Trade Memos', 'file-pen-line'], ['labs', 'Calculators & Scenarios', 'calculator'], ['settings', 'Data & Settings', 'settings-2']].map(([id, label, icon]) => <a href={`/${id}/`} class:list={{ active: path === `/${id}/` }}><i data-lucide={icon}></i>{label}</a>)}
+      </nav>
+      <div class="sidebar-bottom"><span class="status-dot"></span> Local workspace <span class="muted">/ CAD</span><small id="save-status">Personal data stored on this browser</small></div>
+    </aside>
+    <div class="workspace">
+      <header class="topbar">
+        <button class="icon-button mobile-menu" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="sidebar" title="Toggle navigation"><i data-lucide="menu"></i></button>
+        <div class="breadcrumb">Macro Practice <span>/</span> {title}</div>
+        <div class="top-actions"><span class="local-badge"><span class="status-dot"></span> LOCAL</span><button id="theme-toggle" class="icon-button" aria-label="Toggle color theme" title="Toggle color theme"><i data-lucide="sun-moon"></i></button><a href="/settings/" class="icon-button" aria-label="Backup and settings" title="Backup and settings"><i data-lucide="database-backup"></i></a></div>
+      </header>
+      <main id="main" tabindex="-1">
+        <div class="page-heading"><div><div class="eyebrow">{eyebrow}</div><h1>{title}</h1></div><slot name="actions" /></div>
+        <slot />
+      </main>
+      <footer><span>MACRO PRACTICE</span><span>24 weeks. A repeatable investment process.</span><a href="/course/readme/">Course overview</a></footer>
+    </div>
+    <div id="toast" role="status" aria-live="polite" hidden></div>
+    <script is:inline id="curriculum-data" type="application/json" set:html={JSON.stringify(curriculum).replace(/</g, '\u003c')} />
+    <script>import '../scripts/app';</script>
+  </body>
+</html>
