@@ -5,6 +5,8 @@
 ### Week 1 — From Forecast to Investment Thesis
 **Question:** Why can a correct economic forecast still lose money?
 
+📖 **Full lesson:** [From Forecast to Investment Thesis](/course/week-01-forecast-to-thesis/) — textbook notes, worked examples and interactive assignments.
+
 Learn:
 - absolute forecasts vs expectations embedded in prices;
 - consensus, market pricing and distributions;
@@ -24,6 +26,9 @@ Deliverable: 1-page "forecast → price → trade" memo.
 Gate: Explain three ways to lose money despite correctly forecasting the terminal policy rate.
 
 ### Week 2 — Portfolio Mathematics and Shadow Fund Launch
+
+📖 **Full lesson:** [Portfolio Mathematics and Shadow Fund Launch](/course/week-02-portfolio-math/) — textbook notes, worked examples and interactive assignments.
+
 Learn:
 - returns, log vs arithmetic returns;
 - volatility, covariance and correlation;

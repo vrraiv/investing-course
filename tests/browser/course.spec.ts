@@ -109,6 +109,47 @@ test('complete local learning, memo, ledger and backup workflow', async ({ page 
   expect(errors).toEqual([]);
 });
 
+test('expanded week lessons render, deep-link, and hydrate interactive widgets', async ({ page }) => {
+  const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
+
+  // Dashboard week tiles and continue button deep-link to the full lessons.
+  await page.goto('/');
+  await expect(page.locator('.week-tile').first()).toHaveAttribute('href', '/course/week-01-forecast-to-thesis/');
+  await expect(page.locator('#continue-link')).toHaveAttribute('href', '/course/week-01-forecast-to-thesis/');
+
+  // Roadmap links through to the Week 1 lesson.
+  await page.goto('/course/01-roadmap/');
+  await page.getByRole('link', { name: /From Forecast to Investment Thesis/ }).first().click();
+  await expect(page).toHaveURL(/week-01-forecast-to-thesis/);
+  await expect(page.locator('main h1').first()).toContainText('Forecast to Investment Thesis');
+
+  // Expected-value widget computes the default distribution (0.25*120 + 0.5*15 + 0.25*-140 = 2.5)
+  const ev = page.locator('[data-widget="expected-value"]');
+  await expect(ev.locator('table')).toBeVisible();
+  await expect(ev.locator('.calculation-result')).toContainText('2.5');
+  // ...and reacts to input: dropping the bear probability to 0 renormalizes EV to 50.
+  await ev.locator('input[name="p2"]').fill('0');
+  await expect(ev.locator('.calculation-result')).toContainText('50.0');
+  await expect(ev.locator('.calculation-result')).toContainText('sum to');
+
+  // Policy-distribution widget shows a variant-perception comparison against a market reference.
+  const dist = page.locator('[data-widget="policy-distribution"]');
+  await expect(dist.locator('input[name="ref"]')).toBeVisible();
+  await expect(dist.locator('.calculation-result')).toContainText('reference');
+
+  // Week 2 return-stats widget renders statistics and a compounded NAV chart.
+  await page.goto('/course/week-02-portfolio-math/');
+  const rs = page.locator('[data-widget="return-stats"]');
+  await expect(rs.locator('.calc-value').first()).toBeVisible();
+  await expect(rs.locator('svg.chart')).toBeVisible();
+  await rs.locator('textarea[name="returns"]').fill('bad, data');
+  await expect(rs.locator('.error')).toBeVisible();
+
+  // Lesson headings carry progress controls like every other module.
+  await expect(page.locator('#lesson-content .lesson-progress').first()).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
 test('all syllabus pages, responsive layouts, dark mode and local assets', async ({ page }, testInfo) => {
   const errors: string[] = []; const external: string[] = [];
   page.on('pageerror', e => errors.push(e.message));

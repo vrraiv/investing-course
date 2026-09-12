@@ -51,7 +51,8 @@ export async function getCurriculum() {
       ? `${item} ${descriptions[index + 1]?.split('\n')[0] ?? ''}`
       : item;
     const heading = docs.find(d => d.id.startsWith('01-'))?.headings.find(h => h.text === title);
-    return [{ week, title, phase, deliverable: deliverable.split('\n')[0], slug: heading?.slug ?? '' }];
+    const lesson = docs.find(d => d.id.startsWith('week-') && d.data.week === week)?.id ?? '';
+    return [{ week, title, phase, deliverable: deliverable.split('\n')[0], slug: heading?.slug ?? '', lesson }];
   });
   const assessments = nodesFor('09-');
   const weeklyNodes = section(assessments, 'Weekly Self-Test');
