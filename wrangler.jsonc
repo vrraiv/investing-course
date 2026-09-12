@@ -1,0 +1,15 @@
+{
+  // Static Astro site deployed to Cloudflare Workers static assets.
+  // The Cloudflare build ran `npx wrangler versions upload` with no build step
+  // and no assets directory; wrangler runs `build.command` before uploading,
+  // producing ./dist, then serves it as static assets.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "investing-course",
+  "compatibility_date": "2026-09-11",
+  "build": {
+    "command": "npx astro build"
+  },
+  "assets": {
+    "directory": "./dist"
+  }
+}
