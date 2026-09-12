@@ -73,3 +73,34 @@ export function exposures(positions: Position[], group: 'asset_class' | 'country
 export function scenario(shocks: number[], sensitivities: number[]) {
   return shocks.map((shock, i) => shock * sensitivities[i]);
 }
+export function expectedValue(scenarios: { probability: number; payoff: number }[]) {
+  if (!scenarios.length) throw new Error('Enter at least one scenario.');
+  if (scenarios.some(s => !Number.isFinite(s.probability) || !Number.isFinite(s.payoff) || s.probability < 0)) throw new Error('Probabilities must be nonnegative numbers.');
+  const probabilitySum = scenarios.reduce((s, r) => s + r.probability, 0);
+  if (probabilitySum <= 0) throw new Error('Probabilities must sum to a positive number.');
+  // Normalize so the weights are a proper distribution even if the inputs do not sum to 100.
+  const expected = scenarios.reduce((s, r) => s + r.probability / probabilitySum * r.payoff, 0);
+  const modal = scenarios.reduce((best, r) => r.probability > best.probability ? r : best);
+  return { expected, modalPayoff: modal.payoff, probabilitySum, gap: expected - modal.payoff };
+}
+export function returnStats(returns: number[], periodsPerYear: number, riskFreeAnnualPercent = 0) {
+  if (returns.length < 2) throw new Error('Enter at least two period returns.');
+  if (!returns.every(Number.isFinite) || !(periodsPerYear > 0) || returns.some(r => r <= -100)) throw new Error('Use finite returns above -100% and a positive number of periods per year.');
+  const decimals = returns.map(r => r / 100);
+  const arithmetic = decimals.reduce((s, r) => s + r, 0) / decimals.length;
+  const growth = decimals.reduce((s, r) => s * (1 + r), 1);
+  const geometric = growth ** (1 / decimals.length) - 1;
+  // Sample standard deviation (n - 1) of per-period returns.
+  const variance = decimals.reduce((s, r) => s + (r - arithmetic) ** 2, 0) / (decimals.length - 1);
+  const volatility = Math.sqrt(variance);
+  const annualizedReturn = (1 + geometric) ** periodsPerYear - 1;
+  const annualizedVol = volatility * Math.sqrt(periodsPerYear);
+  const excess = annualizedReturn - riskFreeAnnualPercent / 100;
+  const sharpe = annualizedVol === 0 ? null : excess / annualizedVol;
+  const wins = decimals.filter(r => r > 0).length;
+  return {
+    arithmetic: arithmetic * 100, geometric: geometric * 100, volatility: volatility * 100,
+    annualizedReturn: annualizedReturn * 100, annualizedVol: annualizedVol * 100, sharpe,
+    hitRate: wins / decimals.length * 100, totalGrowth: (growth - 1) * 100,
+  };
+}

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { bond, bondPnl, positionSize, portfolioVol, fxForward, pnl, portfolio, maxDrawdown, exposures, scenario } from '../src/lib/finance';
+import { bond, bondPnl, positionSize, portfolioVol, fxForward, pnl, portfolio, maxDrawdown, exposures, scenario, expectedValue, returnStats } from '../src/lib/finance';
 import type { Position } from '../src/lib/state';
 const close = (a: number, b: number, tolerance = 1e-8) => assert.ok(Math.abs(a - b) < tolerance, `${a} != ${b}`);
 test('par bonds, zero coupons, and negative yields', () => {
@@ -50,4 +50,27 @@ test('drawdown includes starting NAV and orders observations chronologically', (
   close(maxDrawdown([{ date: '2026-01-01', nav: 9e7 }])!, 10);
   assert.equal(maxDrawdown([]), null);
   assert.deepEqual(scenario([50, -5, -10, 10], [-10000, 50000, 100000, 25000]), [-500000, -250000, -1000000, 250000]);
+});
+test('expected value normalizes probabilities and finds the modal outcome', () => {
+  const r = expectedValue([{ probability: 25, payoff: 100 }, { probability: 50, payoff: 0 }, { probability: 25, payoff: -100 }]);
+  close(r.expected, 0); close(r.modalPayoff, 0); close(r.probabilitySum, 100); close(r.gap, 0);
+  const skewed = expectedValue([{ probability: 70, payoff: -10 }, { probability: 30, payoff: 100 }]);
+  close(skewed.expected, 23); close(skewed.modalPayoff, -10); close(skewed.gap, 33);
+  // Weights that do not sum to 100 are normalized rather than rejected.
+  close(expectedValue([{ probability: 1, payoff: 40 }, { probability: 1, payoff: 60 }]).expected, 50);
+  assert.throws(() => expectedValue([]));
+  assert.throws(() => expectedValue([{ probability: -1, payoff: 10 }]));
+  assert.throws(() => expectedValue([{ probability: 0, payoff: 10 }]));
+});
+test('return statistics separate arithmetic, geometric, volatility and Sharpe', () => {
+  const flat = returnStats([5, 5, 5, 5], 4);
+  close(flat.arithmetic, 5); close(flat.geometric, 5); close(flat.volatility, 0); assert.equal(flat.sharpe, null); close(flat.hitRate, 100);
+  const swing = returnStats([10, -10], 12);
+  close(swing.arithmetic, 0); assert.ok(swing.geometric < 0); close(swing.hitRate, 50);
+  close(returnStats([100, -50], 1).geometric, 0); // grows then halves back to the start
+  const annual = returnStats([2, -1, 3, 1], 4, 2);
+  assert.ok(annual.annualizedVol > annual.volatility && typeof annual.sharpe === 'number');
+  assert.throws(() => returnStats([5], 4));
+  assert.throws(() => returnStats([5, -100], 4));
+  assert.throws(() => returnStats([5, 5], 0));
 });

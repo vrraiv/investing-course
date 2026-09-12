@@ -6,6 +6,7 @@ import { state, update, replace, toast, escape, empty, setText, download, readJs
 import { initWriting } from './writing';
 import { initPortfolio } from './portfolio';
 import { initLabs } from './labs';
+import { initWidgets } from './widgets';
 
 export const curriculum: Curriculum = JSON.parse(document.querySelector('#curriculum-data')!.textContent!);
 export const icons = () => createIcons({ icons: { LayoutDashboard, Route, ChartNoAxesCombined, ArrowLeftRight, ShieldCheck, Workflow, FlaskConical, BriefcaseBusiness, Files, ClipboardCheck, Library, GraduationCap, NotebookPen, FilePenLine, Calculator, Settings2, Menu, SunMoon, DatabaseBackup, Plus, ArrowRight, ArrowUpRight, Printer, Download, Upload, Save, Copy, Archive, Trash2, X, Camera, Shuffle, Equal, Mic, Pencil, Check } });
@@ -19,6 +20,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') { document.q
 document.addEventListener('click', e => { if (!(e.target as Element).closest('#sidebar, #menu-toggle')) { document.querySelector('#sidebar')!.classList.remove('open'); menu.setAttribute('aria-expanded', 'false'); } });
 document.querySelector('#print-page')?.addEventListener('click', () => window.print());
 
+const weekHref = (w?: { lesson?: string; slug: string }) => w ? (w.lesson ? `/course/${w.lesson}/` : `/course/01-roadmap/#${w.slug}`) : '/course/01-roadmap/';
 const progressKeys = curriculum.docs.filter(d => d.id !== 'readme').flatMap(d => d.headings.map(h => `${d.id}#${h.slug}`));
 function progressPercent(keys: string[]) { return keys.length ? Math.round(keys.filter(key => state.progress[key] === 'complete').length / keys.length * 100) : 0; }
 function dashboard() {
@@ -42,8 +44,8 @@ function dashboard() {
   setText('current-week-label', `WEEK ${String(current.week).padStart(2, '0')}`);
   setText('current-module', current.title.replace(/^Week \d+\s*[—-]\s*/, ''));
   setText('next-deliverable', current.deliverable || 'Complete this week\'s lab and weekly self-test.');
-  document.querySelector('#continue-link')!.setAttribute('href', `/course/01-roadmap/#${current.slug}`);
-  document.querySelector('#week-grid')!.innerHTML = curriculum.weeks.map(w => `<a class="week-tile ${w.week === current.week ? 'current' : ''} ${state.progress[`01-roadmap#${w.slug}`] === 'complete' ? 'complete' : ''}" href="/course/01-roadmap/#${w.slug}" title="${escape(w.title)}" ${w.week === current.week ? 'aria-current="step"' : ''}>${String(w.week).padStart(2, '0')}</a>`).join('');
+  document.querySelector('#continue-link')!.setAttribute('href', weekHref(current));
+  document.querySelector('#week-grid')!.innerHTML = curriculum.weeks.map(w => `<a class="week-tile ${w.week === current.week ? 'current' : ''} ${state.progress[`01-roadmap#${w.slug}`] === 'complete' ? 'complete' : ''}" href="${weekHref(w)}" title="${escape(w.title)}${w.lesson ? ' — full lesson' : ''}" ${w.week === current.week ? 'aria-current="step"' : ''}>${String(w.week).padStart(2, '0')}</a>`).join('');
   setText('roadmap-phase', current.phase);
   setText('memo-count', `${state.memos.length} saved / ${state.memos.filter(m => m.status === 'open').length} open`);
   document.querySelector('#recent-journal')!.innerHTML = [...state.journal].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3).map(j => `<div class="entry-row"><small>${escape(j.date)} / CONFIDENCE ${j.confidence}/5</small><p>${escape(j.observation.slice(0, 200))}</p></div>`).join('') || empty('A place for your market thinking', 'Your latest observations will appear here.', '/journal/', 'Write your first entry');
@@ -114,7 +116,7 @@ function assessments() {
   const renderQuestions = () => {
     document.querySelector('#self-test-questions')!.innerHTML = curriculum.weeklyQuestions.map((q, i) => {
       const key = `week-${weekSelect.value}-${i}`; const a = state.answers[key];
-      return `<section class="question-block" data-question="${key}"><h3>${i + 1}. ${escape(q)}</h3><label>Your answer<textarea data-answer="answer" rows="3">${escape(a?.answer ?? '')}</textarea></label><details><summary>Reveal scoring guide & reference</summary><p>These are open-response assessments. Use the weekly lesson to check the substance of your answer.</p><p style="white-space:pre-line">${escape(curriculum.rubric)}</p><a href="/course/01-roadmap/#${curriculum.weeks.find(w => w.week === Number(weekSelect.value))?.slug}">Week ${weekSelect.value} reference</a></details><fieldset class="score-options"><legend>Self-score</legend>${[0, 1, 2].map(score => `<label><input type="radio" name="${key}" value="${score}" ${a?.score === score ? 'checked' : ''} />${score} / ${['Cannot do', 'Partial', 'Fluent'][score]}</label>`).join('')}</fieldset><label>Notes<textarea data-answer="notes" rows="2">${escape(a?.notes ?? '')}</textarea></label></section>`;
+      return `<section class="question-block" data-question="${key}"><h3>${i + 1}. ${escape(q)}</h3><label>Your answer<textarea data-answer="answer" rows="3">${escape(a?.answer ?? '')}</textarea></label><details><summary>Reveal scoring guide & reference</summary><p>These are open-response assessments. Use the weekly lesson to check the substance of your answer.</p><p style="white-space:pre-line">${escape(curriculum.rubric)}</p><a href="${weekHref(curriculum.weeks.find(w => w.week === Number(weekSelect.value)))}">Week ${weekSelect.value} reference</a></details><fieldset class="score-options"><legend>Self-score</legend>${[0, 1, 2].map(score => `<label><input type="radio" name="${key}" value="${score}" ${a?.score === score ? 'checked' : ''} />${score} / ${['Cannot do', 'Partial', 'Fluent'][score]}</label>`).join('')}</fieldset><label>Notes<textarea data-answer="notes" rows="2">${escape(a?.notes ?? '')}</textarea></label></section>`;
     }).join(''); renderScore();
   };
   renderQuestions(); weekSelect.addEventListener('change', renderQuestions);
@@ -170,3 +172,4 @@ settings();
 initWriting(curriculum, icons);
 initPortfolio(icons);
 initLabs();
+initWidgets();
